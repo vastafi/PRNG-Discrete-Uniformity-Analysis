@@ -1,0 +1,18 @@
+# the dataset is cloned in, never committed
+data
+data/
+
+# generated output
+results/
+figures/
+
+# python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# editors and OS
+.idea/
+.vscode/
+.DS_Store
