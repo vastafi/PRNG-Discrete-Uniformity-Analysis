@@ -39,7 +39,7 @@ DPI = 600
 TIER_COLOUR = {1: "#1b7837", 2: "#5e81ac", 3: "#b2182b", 4: "#7b3294", 5: "#555555"}
 TIER_HATCH = {1: "", 2: "//", 3: "xx", 4: "..", 5: "\\\\"}
 
-WRAP = {"Python secrets": "Python\nsecrets", "Python numpy": "Python\nnumpy",
+WRAP = {"Python secrets": "Python\nsecrets", "Python numpy": "Python\nNumPy",
         "Java ThreadLocalRandom": "Java\nThreadLocalRandom",
         "Java SecureRandom": "Java\nSecureRandom", "pi": r"$\pi$"}
 
@@ -83,13 +83,17 @@ def figure1(res, out, pdf):
                   ha="right", fontsize=7.5)
     ax.set_ylabel("composite index (two-sided calibration)")
     ax.set_ylim(0, 1)
-    handles = [plt.Rectangle((0, 0), 1, 1, color=TIER_COLOUR[t], hatch=TIER_HATCH[t])
-               for t in sorted(set(tiers.values()))]
-    ax.legend(handles + [plt.Line2D([], [], ls="--", c="k"),
-                         plt.Line2D([], [], ls=":", c="0.35"),
-                         plt.Rectangle((0, 0), 1, 1, color="0.90")],
-              [f"tier {t}" for t in sorted(set(tiers.values()))]
-              + [f"5% alarm ({thr:.3f})", "97.5% null bound", "95% null band"],
+    sidak = res.get("threshold_sidak")
+    extra_h, extra_l = [], []
+    if sidak is not None:
+        ax.axhline(sidak, ls="-.", c="0.25", lw=1.0, zorder=4)
+        extra_h = [plt.Line2D([], [], ls="-.", c="0.25")]
+        extra_l = [f"Šidák-corrected alarm ({sidak:.3f})"]
+    # a single tier is not a classification, so it is not shown in the legend
+    ax.legend([plt.Line2D([], [], ls="--", c="k")] + extra_h
+              + [plt.Line2D([], [], ls=":", c="0.35"),
+                 plt.Rectangle((0, 0), 1, 1, color="0.90")],
+              [f"5% alarm ({thr:.3f})"] + extra_l + ["97.5% null bound", "95% null band"],
               fontsize=6.5, ncol=2, loc="upper right", frameon=False)
     save(fig, out, "figure1", pdf)
 

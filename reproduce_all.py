@@ -63,7 +63,8 @@ from scipy.stats import chi2, norm, spearmanr, t as tdist, f as fdist
 # ----------------------------------------------------------------------------
 
 N_NULL = 120_000          # null replicates, count-based criteria
-N_SEQ_NULL = 200          # null replicates, sequence-based criteria (expensive)
+N_SEQ_NULL = 4000         # null replicates, sequence-based criteria
+N_CAL = 1_000_000         # stream length for that null (both statistics are asymptotically free of N)
 SEED = 20260908
 DIGITS = np.arange(10)
 
@@ -279,12 +280,15 @@ def null_index(null, seq_null, rng, weights=WEIGHTS, B=None, form="additive"):
         r = null[k].argsort().argsort()
         hi = 1.0 - (r + 0.5) / len(r)
         T[k] = np.minimum(1.0, 2.0 * np.minimum(hi, 1.0 - hi))
+    # r1 and the serial chi-square come from the same simulated sequence and are
+    # not independent of each other, so they are resampled jointly (same index)
+    pick = rng.integers(0, len(seq_null["r1"]), size=B)
     for k in SEQ_CRITERIA:
         v = seq_null[k]
         r = v.argsort().argsort()
         hi = 1.0 - (r + 0.5) / len(r)
         tt = hi if k == "r1" else np.minimum(1.0, 2.0 * np.minimum(hi, 1.0 - hi))
-        T[k] = rng.choice(tt, size=B, replace=True)
+        T[k] = tt[pick]
     if form == "geometric":
         floor = 1.0 / max(B, 1)
         return np.exp(sum(weights[k] * np.log(np.maximum(T[k], floor)) for k in weights))
@@ -390,7 +394,7 @@ def main():
     ap.add_argument("--out", default="./results")
     ap.add_argument("--null", type=int, default=N_NULL)
     ap.add_argument("--seq-null", type=int, default=N_SEQ_NULL)
-    ap.add_argument("--n-cal", type=int, default=None,
+    ap.add_argument("--n-cal", type=int, default=N_CAL,
                     help="stream length for the sequence-based null (default: N)")
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)
