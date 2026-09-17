@@ -1,25 +1,32 @@
 #!/usr/bin/env python3
 """
-Draws Figure 1 and Figure 2 of
+make_figures.py  (version 2)
 
-  "Concordance with the Discrete Uniform Distribution of Pseudorandom Number
-   Generators in the Most Commonly Used Computer Applications"
-  V. Astafi, A. Leahu, D. Ciorba
+Draws Figures 1 to 4 from the results.json produced by reproduce_all.py v2.
+It does no statistics of its own: every number plotted is read from that file.
 
-from the results.json produced by reproduce_all.py. It does no statistics of
-its own: every number it plots is read from that file, so the figures always
-agree with the tables.
+Changes with respect to version 1
+---------------------------------
+* No hard-coded TOP_CUT.  Version 1 decided the "top tier" with a constant
+  0.60 that appears nowhere in the paper; the tiers are now read from
+  results.json, where they come from the overlap of the per-run confidence
+  intervals.
+* Figure 2 now shows the null band and the per-run confidence interval, which
+  is what makes the within-source versus between-source comparison legible.
+* Two new figures:
+    Figure 3 - the score of every source on every criterion, which shows at a
+               glance which criterion drives each result;
+    Figure 4 - the Spearman correlation of the nine criteria under H0, which
+               documents the redundancy of the criterion set, in particular
+               the perfect correlation between the entropy deficit and the
+               goodness-of-fit chi-square.
+* Vector PDF by default plus 600 dpi PNG, and a colour scheme that stays
+  legible in greyscale; tier is encoded by colour AND by hatching.
 
 Usage
 -----
-  python3 reproduce_all.py --data data --out results      # first
+  python3 reproduce_all.py --data data --out results
   python3 make_figures.py  --results results/results.json --out figures
-
-Output: figures/figure1.png and figures/figure2.png at 300 dpi, the resolution
-required for submission. Add --pdf for vector versions as well.
-
-Requirements: numpy, matplotlib.
-Runtime: a couple of seconds.
 """
 
 import argparse, json, os
@@ -28,123 +35,144 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-# ----------------------------------------------------------------------------
-# Appearance
-# ----------------------------------------------------------------------------
+DPI = 600
+TIER_COLOUR = {1: "#1b7837", 2: "#5e81ac", 3: "#b2182b", 4: "#7b3294", 5: "#555555"}
+TIER_HATCH = {1: "", 2: "//", 3: "xx", 4: "..", 5: "\\\\"}
 
-TOP_CUT = 0.60        # a source is "top tier" at or above this index value;
-                      # "bottom tier" below the 5% alarm threshold; middle otherwise
-DPI     = 300
-FIGSIZE = (8.2, 4.3)
+WRAP = {"Python secrets": "Python\nsecrets", "Python numpy": "Python\nnumpy",
+        "Java ThreadLocalRandom": "Java\nThreadLocalRandom",
+        "Java SecureRandom": "Java\nSecureRandom", "pi": r"$\pi$"}
 
-COLOURS = {"top": "#2e7d32", "middle": "#7b83c4", "bottom": "#b3282d"}
+CRIT_LABEL = {"dmean": "mean", "dvar": "variance", "dskew": "skewness",
+              "dexc": "exc. kurtosis", "dH": "entropy", "chi": r"$\chi^2$ GoF",
+              "dks": "KS distance", "chiser": r"$\chi^2$ serial", "r1": "lag-1 autocorr."}
 
-# two-line labels keep the x axis readable
-WRAP = {
-    "Python secrets":         "Python\nsecrets",
-    "Python numpy":           "Python\nnumpy",
-    "Java ThreadLocalRandom": "Java\nThreadLocalRandom",
-    "Java SecureRandom":      "Java\nSecureRandom",
-    "pi":                     r"$\pi$",
-}
 
 def label(name):
     return WRAP.get(name, name)
 
-def tier_of(value, threshold):
-    if value >= TOP_CUT:
-        return "top"
-    if value < threshold:
-        return "bottom"
-    return "middle"
 
-# ----------------------------------------------------------------------------
-# Figures
-# ----------------------------------------------------------------------------
+def style():
+    plt.rcParams.update({"font.size": 8, "axes.spines.top": False,
+                         "axes.spines.right": False, "savefig.bbox": "tight"})
 
-def figure1(res, path):
-    """Composite index per source, coloured by tier, with the alarm threshold
-    and the 95% null band."""
-    scores = {k: v["crqi"] for k, v in res["scores"].items()}
-    thr    = res["threshold_5pct"]
-    lo, hi = res["null_band_95"]
-    order  = sorted(scores, key=lambda k: -scores[k])
-    values = [scores[k] for k in order]
-    tiers  = [tier_of(v, thr) for v in values]
 
-    fig, ax = plt.subplots(figsize=FIGSIZE, dpi=DPI)
+def save(fig, out, stem, pdf=True):
+    fig.savefig(os.path.join(out, f"{stem}.png"), dpi=DPI)
+    if pdf:
+        fig.savefig(os.path.join(out, f"{stem}.pdf"))
+    plt.close(fig)
+    print("  wrote", stem)
+
+
+def figure1(res, out, pdf):
+    idx = {k: v["index_twoside"] for k, v in res["scores"].items()}
+    tiers = res["tiers"]
+    thr, (lo, hi) = res["threshold_5pct"], res["null_band_95"]
+    order = sorted(idx, key=lambda k: -idx[k])
+
+    fig, ax = plt.subplots(figsize=(6.6, 3.4))
     ax.axhspan(lo, hi, color="0.90", zorder=0)
-    ax.bar(range(len(order)), values,
-           color=[COLOURS[t] for t in tiers], zorder=3, width=0.68)
-    ax.axhline(thr, ls="--", c="k", lw=1.1, zorder=4)
-
-    ax.set_xticks(range(len(order)))
-    ax.set_xticklabels([label(k) for k in order], rotation=45, ha="right", fontsize=7.5)
-    ax.set_ylabel("Composite index (CRQI)")
-    ax.set_ylim(0, 1.0)
-
-    handles = [plt.Rectangle((0, 0), 1, 1, color=COLOURS[t]) for t in ("top", "middle", "bottom")]
+    for i, s in enumerate(order):
+        t = tiers[s]
+        ax.bar(i, idx[s], width=0.66, color=TIER_COLOUR.get(t, "0.5"),
+               hatch=TIER_HATCH.get(t, ""), edgecolor="white", linewidth=0.6, zorder=3)
+    ax.axhline(thr, ls="--", c="k", lw=1.0, zorder=4)
+    ax.axhline(hi, ls=":", c="0.35", lw=1.0, zorder=4)
+    ax.set_xticks(range(len(order)), [label(s) for s in order], rotation=45,
+                  ha="right", fontsize=7.5)
+    ax.set_ylabel("composite index (two-sided calibration)")
+    ax.set_ylim(0, 1)
+    handles = [plt.Rectangle((0, 0), 1, 1, color=TIER_COLOUR[t], hatch=TIER_HATCH[t])
+               for t in sorted(set(tiers.values()))]
     ax.legend(handles + [plt.Line2D([], [], ls="--", c="k"),
+                         plt.Line2D([], [], ls=":", c="0.35"),
                          plt.Rectangle((0, 0), 1, 1, color="0.90")],
-              ["top tier", "middle tier", "bottom tier",
-               f"5% alarm ({thr:.3f})", "95% null band"],
-              fontsize=7, loc="upper right", ncol=2)
-    fig.tight_layout()
-    fig.savefig(path)
-    plt.close(fig)
-    return path
+              [f"tier {t}" for t in sorted(set(tiers.values()))]
+              + [f"5% alarm ({thr:.3f})", "97.5% null bound", "95% null band"],
+              fontsize=6.5, ncol=2, loc="upper right", frameon=False)
+    save(fig, out, "figure1", pdf)
 
-def figure2(res, path):
-    """Per-run composite index: one dot per run, a bar at the source mean and a
-    vertical line spanning the within-source range."""
-    scores  = {k: v["crqi"] for k, v in res["scores"].items()}
-    per_run = res["per_run_crqi"]
-    thr     = res["threshold_5pct"]
-    order   = sorted(scores, key=lambda k: -scores[k])
 
-    fig, ax = plt.subplots(figsize=FIGSIZE, dpi=DPI)
-    for i, name in enumerate(order):
-        v = per_run[name]
-        colour = COLOURS[tier_of(scores[name], thr)]
-        ax.scatter([i] * len(v), v, s=22, color=colour, zorder=3, alpha=0.85)
-        ax.plot([i - 0.28, i + 0.28], [np.mean(v)] * 2, color="k", lw=1.4, zorder=4)
-        ax.plot([i, i], [min(v), max(v)], color="0.55", lw=0.9, zorder=2)
+def figure2(res, out, pdf):
+    per_run, cis = res["per_run_crqi"], res["per_run_ci"]
+    idx = {k: v["index_twoside"] for k, v in res["scores"].items()}
+    tiers, (lo, hi) = res["tiers"], res["null_band_95"]
+    order = sorted(idx, key=lambda k: -idx[k])
 
-    ax.set_xticks(range(len(order)))
-    ax.set_xticklabels([label(k) for k in order], rotation=45, ha="right", fontsize=7.5)
-    ax.set_ylabel("Per-run composite index")
-    ax.legend([plt.Line2D([], [], color="k", lw=1.4)], ["source mean"], fontsize=8)
-    fig.tight_layout()
-    fig.savefig(path)
-    plt.close(fig)
-    return path
+    fig, ax = plt.subplots(figsize=(6.6, 3.6))
+    ax.axhspan(lo, hi, color="0.92", zorder=0)
+    for i, s in enumerate(order):
+        v = np.asarray(per_run[s], float)
+        c = TIER_COLOUR.get(tiers[s], "0.5")
+        ax.plot([i, i], [v.min(), v.max()], color="0.6", lw=0.9, zorder=2)
+        ax.scatter([i] * v.size, v, s=20, color=c, alpha=0.85, zorder=3)
+        ax.plot([i - 0.3, i + 0.3], [v.mean()] * 2, color="k", lw=1.5, zorder=4)
+        ax.fill_between([i - 0.18, i + 0.18], cis[s][0], cis[s][1],
+                        color=c, alpha=0.18, zorder=1)
+    ax.set_xticks(range(len(order)), [label(s) for s in order], rotation=45,
+                  ha="right", fontsize=7.5)
+    ax.set_ylabel("per-run composite index")
+    ax.set_ylim(0, 1)
+    w = res.get("within_source_range_mean")
+    b = res.get("between_source_range")
+    if w and b:
+        ax.set_title(f"mean within-source range {w:.2f} vs between-source range {b:.2f}",
+                     fontsize=8)
+    save(fig, out, "figure2", pdf)
 
-# ----------------------------------------------------------------------------
+
+def figure3(res, out, pdf):
+    crits = res["diagnostics"]["criterion_correlations"]["criteria"]
+    idx = {k: v["index_twoside"] for k, v in res["scores"].items()}
+    order = sorted(idx, key=lambda k: -idx[k])
+    M = np.array([[res["scores"][s]["t_twoside"][c] for c in crits] for s in order])
+
+    fig, ax = plt.subplots(figsize=(6.6, 3.6))
+    im = ax.imshow(M, cmap="RdYlGn", vmin=0, vmax=1, aspect="auto")
+    ax.set_xticks(range(len(crits)), [CRIT_LABEL.get(c, c) for c in crits],
+                  rotation=40, ha="right")
+    ax.set_yticks(range(len(order)), [s.replace("\n", " ") for s in order], fontsize=7.5)
+    for i in range(M.shape[0]):
+        for j in range(M.shape[1]):
+            ax.text(j, i, f"{M[i, j]:.2f}", ha="center", va="center", fontsize=5.5,
+                    color="0.1")
+    fig.colorbar(im, ax=ax, shrink=0.9, label="two-sided typicality score")
+    save(fig, out, "figure3", pdf)
+
+
+def figure4(res, out, pdf):
+    cc = res["diagnostics"]["criterion_correlations"]
+    crits, M = cc["criteria"], np.array(cc["spearman"])
+    fig, ax = plt.subplots(figsize=(4.6, 4.0))
+    im = ax.imshow(M, cmap="RdBu_r", vmin=-1, vmax=1)
+    lab = [CRIT_LABEL.get(c, c) for c in crits]
+    ax.set_xticks(range(len(crits)), lab, rotation=40, ha="right")
+    ax.set_yticks(range(len(crits)), lab)
+    for i in range(len(crits)):
+        for j in range(len(crits)):
+            ax.text(j, i, f"{M[i, j]:.2f}", ha="center", va="center", fontsize=5.5,
+                    color="0.1")
+    fig.colorbar(im, ax=ax, shrink=0.85, label=r"Spearman correlation under $H_0$")
+    save(fig, out, "figure4", pdf)
+
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--results", default="results/results.json",
-                    help="the file written by reproduce_all.py")
+    ap.add_argument("--results", default="results/results.json")
     ap.add_argument("--out", default="figures")
-    ap.add_argument("--pdf", action="store_true", help="also write vector PDF versions")
+    ap.add_argument("--no-pdf", action="store_true")
     args = ap.parse_args()
-
     with open(args.results) as fh:
         res = json.load(fh)
     os.makedirs(args.out, exist_ok=True)
-
-    print(f"{len(res['scores'])} source(s); alarm threshold {res['threshold_5pct']:.3f}")
-    for ext in (["png", "pdf"] if args.pdf else ["png"]):
-        p1 = figure1(res, os.path.join(args.out, f"figure1.{ext}"))
-        p2 = figure2(res, os.path.join(args.out, f"figure2.{ext}"))
-        print("  wrote", p1)
-        print("  wrote", p2)
-
-    within  = res.get("within_source_range_mean")
-    between = res.get("between_source_range")
-    if within is not None and not np.isnan(within):
-        print(f"\nFigure 2 caption figures: mean within-source range {within:.2f}, "
-              f"between-source range of means {between:.2f}")
+    style()
+    pdf = not args.no_pdf
+    figure1(res, args.out, pdf)
+    figure2(res, args.out, pdf)
+    figure3(res, args.out, pdf)
+    figure4(res, args.out, pdf)
+    print(f"\nfigures written to {args.out}")
 
 
 if __name__ == "__main__":

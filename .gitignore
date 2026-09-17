@@ -5,6 +5,10 @@ data/
 # generated output
 results/
 figures/
+results_control/
+results_extraction/
+results_multiseed/
+tables/
 
 # python
 __pycache__/
