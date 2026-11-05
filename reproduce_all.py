@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 """
-reproduce_all.py  (version 2)
-
 Recomputes every statistic of
 
   "A Multi-Criterion Statistical Assessment of Discrete Uniformity in Random
@@ -24,15 +22,20 @@ What changed with respect to version 1
 
 (b) The serial chi-square and the lag-1 autocorrelation are calibrated by
     Monte Carlo on simulated digit streams instead of by their asymptotic laws.
-    The overlapping-pairs statistic is slightly under-dispersed relative to
-    chi2(81) (simulated variance ~152 against 162), so the asymptotic p-value
-    used in v1 is mildly conservative.
+    With the default settings (4,000 streams of 10^6 digits) the simulated
+    variance of the serial statistic is 165 +/- 4 for the null used at the
+    pooled length and 156 +/- 4 for the null used at the per-run length,
+    against 162 for chi2(81), with false-alarm rates of 5.1% and 4.7% at the
+    nominal 5% level; see diagnostics["serial_null_check"] in results.json.
+    The asymptotic law is therefore adequate, and the simulation is used
+    because it preserves the joint dependence of the two statistics.
 
 (c) v1 built the null distribution of the index with
         U["r1"] = rng.random(B);  U["chiser"] = rng.random(B)
-    i.e. it ASSUMED those two scores are exactly uniform under H0.  For r1 that
-    is nearly true, for the serial statistic it is not (see (b)).  v2 uses the
-    simulated null of both statistics.
+    i.e. it drew the two scores independently of each other, although the
+    serial chi-square contains the component N * r1^2 and is therefore
+    dependent on r1.  v2 draws both scores jointly from the same simulated
+    stream, which preserves that dependence.
 
 (d) Tiers are no longer defined by a hard-coded constant (v1 used TOP_CUT =
     0.60 inside make_figures.py, a number that appears nowhere in the paper).
@@ -313,6 +316,20 @@ def report_identity(null, N):
                                                 np.percentile(null["dH"], [5, 95])]}
 
 
+def serial_null_check(seq_null):
+    """Variance and false-alarm rate of the simulated serial chi-square null,
+    against chi2(81) (variance 162, 5% rejection rate).  Deterministic: uses no
+    random numbers, so it does not change any other result."""
+    s = np.asarray(seq_null["chiser"], float)
+    B = s.size
+    v = float(s.var(ddof=1))
+    m4 = float(np.mean((s - s.mean()) ** 4))
+    se_v = float(np.sqrt(max(m4 - v ** 2 * (B - 3) / (B - 1), 0.0) / B))
+    return {"n_cal": int(seq_null["n_cal"]), "B": int(B), "mean": float(s.mean()),
+            "variance": v, "variance_se": se_v, "chi2_81_variance": 162.0,
+            "false_alarm_5pct": float((s > chi2.ppf(0.95, 81)).mean())}
+
+
 def criterion_correlations(null, seq_null, rng):
     B = min(len(null["chi"]), 20_000)
     cols = []
@@ -497,6 +514,10 @@ def main():
         "entropy_chi2_identity": report_identity(nulls[Ns[0]], Ns[0]),
         "criterion_correlations": criterion_correlations(nulls[Ns[0]], seq_nulls[Ns[0]], rng),
         "variance_components": variance_components(per_run),
+        "serial_null_check": {
+            "pooled_length": serial_null_check(seq_nulls[Ns[0]]),
+            "per_run_length": serial_null_check(seq_run_nulls[run_sizes[0]]),
+        },
     }
     tl = next((n for n in sources if "ThreadLocal" in n), None)
     if tl:
@@ -557,6 +578,10 @@ def main():
     print(f"  => the entropy criterion carries no information beyond the goodness-of-fit chi2")
     print(f"entropy null centre |H_hat-H| = {d['null_mean_abs_entropy_deviation']:.3e} "
           f"(NOT zero); 5-95% = {d['null_5_95_abs_entropy_deviation']}")
+    for lab, c in diag["serial_null_check"].items():
+        print(f"serial chi2 null ({lab}): variance = {c['variance']:.1f} +/- "
+              f"{c['variance_se']:.1f} (chi2(81): 162), false-alarm rate at 5% = "
+              f"{100 * c['false_alarm_5pct']:.1f}%")
     vc = diag["variance_components"]
     if vc:
         print(f"variance components: within = {vc['sigma2_within']:.5f}, "

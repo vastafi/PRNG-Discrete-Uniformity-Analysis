@@ -1,8 +1,5 @@
 # Reproduction package
 
-Analysis code for *A Multi-Criterion Statistical Assessment of Discrete Uniformity in
-Random and Pseudorandom Number Sources* (Astafi, Leahu, Ciorba).
-
 The digit files are in the companion repository
 https://github.com/vastafi/PRNG-Random-Digits-0-9-Dataset (ten sources, six runs of
 2,614,690 digits each).
