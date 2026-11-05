@@ -1,15 +1,5 @@
 # the dataset is cloned in, never committed
 data
-data/
-
-# generated output
-results/
-figures/
-results_control/
-results_extraction/
-results_multiseed/
-tables/
-
 # python
 __pycache__/
 *.py[cod]
