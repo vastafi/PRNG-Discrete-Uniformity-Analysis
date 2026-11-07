@@ -1,4 +1,4 @@
-"""summaries: corrected correlation table, G-based index variant, positive
+"""Summaries: corrected correlation table, G-based index variant, positive
 control with Wilson intervals, Monte Carlo check of the power formula."""
 import argparse, json, math
 import numpy as np
@@ -12,7 +12,7 @@ ap.add_argument("--multiseed", default="results_multiseed/multiseed.json")
 ap.add_argument("--pc", nargs="+", required=True, help="pc1000.py outputs, in order")
 ap.add_argument("--joint-run", nargs="+", required=True)
 ap.add_argument("--joint-pooled", nargs="+", required=True, help="joint_null.py outputs at the pooled length, in order")
-ap.add_argument("--out", default="results/final.json")
+ap.add_argument("--out", default="results_extra/final.json")
 args = ap.parse_args()
 
 out = {}

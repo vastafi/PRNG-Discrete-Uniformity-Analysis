@@ -1,4 +1,4 @@
-"""Positive control with many replicates . Usage: pc1000.py --reps R --start S --out f.json"""
+"""Positive control with many replicates. Usage: pc1000.py --reps R --start S --out f.json"""
 import argparse, json, time
 import numpy as np
 from common import (SEED, build_null, build_seq_null, scores, index_value, index_geom,

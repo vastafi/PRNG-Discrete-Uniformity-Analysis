@@ -14,14 +14,7 @@ https://github.com/vastafi/PRNG-Random-Digits-0-9-Dataset (ten sources, six runs
 | `positive_control.py` | false-alarm rate and power of the index on deliberately corrupted streams |
 | `multiseed.py` | the same analysis over many independent seeds, with the variance decomposition |
 | `extraction_audit.py` | control experiment: one algorithm, five digit-extraction paths |
-| `requirements.txt` | dependencies |
-| `common.py` | nine criteria, likelihood-ratio statistic G, null calibration, two-sided scores, additive and geometric index | all |
-| `quick.py` | G for every source, Pearson–G agreement, ANOVA without pi, sensitivity of the required number of runs | Sections 3.2, 5; Tables 2, 5 |
-| `joint_null.py` | all nine criteria computed together on complete uniform sequences (joint null) | Section 3.1 |
-| `joint_analysis.py` | joint null vs block-product null; tests of block independence | Section 3.1 |
-| `pc1000.py` | positive control over 1,000 replicates, additive and geometric index | Section 6.3, Table 6 |
-| `final.py` | correlation table, G-based index variant, Wilson intervals, Monte Carlo check of the power formula | Tables 1, 6; Section 5 |
-| `run.sh` | runs all of the above in order | — |
+| `requirements.txt` | dependencies | — |
 
 
 ## Run order
@@ -36,15 +29,38 @@ python3 positive_control.py --data data --reps 50 --out results_control
 python3 multiseed.py --seeds 200 --n 2614690 --null 120000 --seq-null 4000 --out results_multiseed
 python3 extraction_audit.py --n 2614690 --null 120000 --seq-null 4000 --out results_extraction
 ```
+## Additional analyses
 
+These scripts sit in the repository root next to `reproduce_all.py` and read only its
+outputs and those of `multiseed.py`.
 
-### Run
+| file | what it does |
+|---|---|
+| `common.py` | nine criteria, likelihood-ratio statistic G, null calibration, two-sided scores, additive and geometric index (shared by the scripts below) |
+| `quick.py` | G for every source, Pearson–G agreement, ANOVA without pi, sensitivity of the required number of runs |
+| `joint_null.py` | all nine criteria computed together on complete uniform sequences (joint null) |
+| `joint_analysis.py` | joint null vs. separately calibrated blocks; tests of block independence |
+| `pc1000.py` | positive control over 1,000 replicates, additive and geometric index |
+| `final.py` | criterion correlation table, G-based index variant, Wilson intervals, Monte Carlo check of the power formula |
+| `run_all.sh` | runs the whole pipeline in order |
+
+Outputs are written to `results_extra/`.
+
+### Scoring of the moment criteria
+
+The four moment criteria (mean, variance, skewness, excess kurtosis) are scored two-sided
+on the **signed** deviation. Their absolute deviation has its null mode at zero, so a
+two-sided score on it would treat a deviation close to zero as atypical. Pearson's
+chi-square, the entropy deviation and the Kolmogorov–Smirnov distance are scored
+two-sided on the statistic itself, where a value far below the null centre is genuine
+under-dispersion; the lag-1 autocorrelation uses the upper tail of |Z|.
+
+### Run everything
 
 ```bash
-python3 reproduce_all.py --data data --out results          # version-2 pipeline, if not yet run
-python3 multiseed.py --seeds 200 --n 2614690 --null 120000 --seq-null 4000 --out results_multiseed
-bash run.sh                                            # about 1.5 h on one core
+bash run_all.sh
 ```
+
 
 Run each command on its own line. `--data` expects one subfolder per source and
 one file per run; folder and file names do not matter.

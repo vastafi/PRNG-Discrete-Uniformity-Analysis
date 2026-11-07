@@ -1,6 +1,16 @@
 #!/usr/bin/env python3
 """
+Recomputes every statistic of
 
+  "A Multi-Criterion Statistical Assessment of Discrete Uniformity in Random
+   and Pseudorandom Number Sources"
+  V. Astafi, A. Leahu, D. Ciorba
+
+from the raw digit files.  Drop-in replacement for version 1: same data
+discovery, same CLI, same results.json keys plus new ones.
+
+What changed with respect to version 1
+--------------------------------------
 (a) Two-sided calibration.  v1 scored every criterion with
         u = P(T_null > T_obs),
     which returns u -> 1 when the observed statistic is unusually SMALL.  For
@@ -76,6 +86,13 @@ WEIGHTS_NO_ENTROPY = {"dmean": 0.15, "dvar": 0.15, "chi": 0.18, "chiser": 0.18,
                       "dskew": 0.02, "dexc": 0.02, "dH": 0.0}
 
 COUNT_CRITERIA = ["dmean", "dvar", "dskew", "dexc", "dH", "chi", "dks"]
+
+# The four moment criteria are scored two-sided on the SIGNED
+# deviation. Their absolute values have a null mode at zero, so a two-sided
+# score on |deviation| would wrongly treat a deviation near zero as atypical.
+# Pearson chi2, entropy and KS keep the two-sided score on the statistic itself,
+# where a value far below the null centre is genuine under-dispersion.
+SIGNED = {"dmean": "smean", "dvar": "svar", "dskew": "sskew", "dexc": "sexc"}
 SEQ_CRITERIA = ["r1", "chiser"]
 ALL_CRITERIA = COUNT_CRITERIA + SEQ_CRITERIA
 
@@ -164,6 +181,7 @@ def stats_from_counts(C):
     return {"mean": m, "var": m2, "skew": g1, "exc": g2, "H": H,
             "dmean": np.abs(m - EX), "dvar": np.abs(m2 - VARX),
             "dskew": np.abs(g1 - ASX), "dexc": np.abs(g2 - EXCX),
+            "smean": m - EX, "svar": m2 - VARX, "sskew": g1 - ASX, "sexc": g2 - EXCX,
             "dH": np.abs(H - HX), "chi": chisq, "dks": D}
 
 
@@ -241,6 +259,8 @@ def percentile_scores(null, seq_null, observed, N):
     u, t = {}, {}
     for k in COUNT_CRITERIA:
         t[k], u[k] = two_sided(observed[k], null[k])
+        if k in SIGNED:  # two-sided on the signed deviation (see SIGNED)
+            t[k], _ = two_sided(observed[SIGNED[k]], null[SIGNED[k]])
     # version-1 asymptotic scores, kept for comparison
     u["r1"] = float(2 * norm.sf(abs(observed["r1"] + 1.0 / N) * np.sqrt(N)))
     u["chiser"] = float(chi2.sf(observed["chiser"], 81))
@@ -270,7 +290,8 @@ def null_index(null, seq_null, rng, weights=WEIGHTS, B=None, form="additive"):
     B = B or len(null["chi"])
     T = {}
     for k in COUNT_CRITERIA:
-        r = null[k].argsort().argsort()
+        v = null[SIGNED[k]] if k in SIGNED else null[k]   # signed deviation for the four moments
+        r = v.argsort().argsort()
         hi = 1.0 - (r + 0.5) / len(r)
         T[k] = np.minimum(1.0, 2.0 * np.minimum(hi, 1.0 - hi))
     # r1 and the serial chi-square come from the same simulated sequence and are

@@ -1,4 +1,4 @@
-"""Self-contained re-implementation of the scoring used in the paper:
+"""Self-contained implementation of the scoring used in the paper:
 nine criteria, multinomial null for the count block, sequence null for the pair
 block, two-sided typicality scores, additive and geometric index."""
 import numpy as np
@@ -11,6 +11,8 @@ HX = np.log2(10)
 WEIGHTS = {"dmean": 0.15, "dvar": 0.15, "chi": 0.15, "chiser": 0.15, "dks": 0.15, "r1": 0.15,
            "dskew": 1 / 30, "dexc": 1 / 30, "dH": 1 / 30}
 COUNT = ["dmean", "dvar", "dskew", "dexc", "dH", "chi", "dks"]
+# The four moment criteria are scored two-sided on the SIGNED deviation
+SIGNED = {"dmean": "smean", "dvar": "svar", "dskew": "sskew", "dexc": "sexc"}
 SEQ = ["r1", "chiser"]
 
 
@@ -32,7 +34,9 @@ def stats_from_counts(C):
     G = 2 * np.where(C > 0, C * np.log(np.where(C > 0, C, 1.0) / E[:, None]), 0.0).sum(axis=1)
     D = np.max(np.abs(np.cumsum(C, axis=1) / n[:, None] - (DIGITS + 1) / 10.0), axis=1)
     return {"dmean": np.abs(m - EX), "dvar": np.abs(m2 - VARX), "dskew": np.abs(g1 - ASX),
-            "dexc": np.abs(g2 - EXCX), "dH": np.abs(H - HX), "chi": chisq, "G": G, "dks": D}
+            "dexc": np.abs(g2 - EXCX),
+            "smean": m - EX, "svar": m2 - VARX, "sskew": g1 - ASX, "sexc": g2 - EXCX,
+            "dH": np.abs(H - HX), "chi": chisq, "G": G, "dks": D}
 
 
 def lag1(x):
@@ -76,7 +80,7 @@ def two_sided(obs, null):
 
 
 def scores(null, seq, o, N):
-    t = {k: two_sided(o[k], null[k]) for k in COUNT}
+    t = {k: two_sided(o[SIGNED.get(k, k)], null[SIGNED.get(k, k)]) for k in COUNT}
     t["r1"] = float((seq["r1"] > abs(o["r1"] + 1.0 / N) * np.sqrt(N)).mean())
     t["chiser"] = two_sided(o["chiser"], seq["chiser"])
     return t
@@ -101,7 +105,7 @@ def null_index(null, seq, rng, w=WEIGHTS, form="additive"):
     B = len(null["chi"])
     T = {}
     for k in COUNT:
-        h = _mid(null[k]); T[k] = np.minimum(1.0, 2.0 * np.minimum(h, 1.0 - h))
+        h = _mid(null[SIGNED.get(k, k)]); T[k] = np.minimum(1.0, 2.0 * np.minimum(h, 1.0 - h))
     pick = rng.integers(0, len(seq["r1"]), size=B)
     for k in SEQ:
         h = _mid(seq[k]); tt = h if k == "r1" else np.minimum(1.0, 2.0 * np.minimum(h, 1.0 - h))

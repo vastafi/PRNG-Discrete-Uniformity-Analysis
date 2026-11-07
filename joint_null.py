@@ -8,7 +8,8 @@ ap = argparse.ArgumentParser()
 ap.add_argument("--N", type=int); ap.add_argument("--B", type=int); ap.add_argument("--out"); ap.add_argument("--tag", type=int, default=0)
 a = ap.parse_args()
 rng = np.random.default_rng([SEED, 999, a.N] + ([a.tag] if a.tag else []))
-keys = ["dmean", "dvar", "dskew", "dexc", "dH", "chi", "G", "dks", "r1", "chiser"]
+keys = ["dmean", "dvar", "dskew", "dexc", "smean", "svar", "sskew", "sexc",
+        "dH", "chi", "G", "dks", "r1", "chiser"]
 out = {k: np.empty(a.B) for k in keys}
 t0 = time.time()
 for b in range(a.B):

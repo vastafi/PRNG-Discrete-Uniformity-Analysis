@@ -18,7 +18,7 @@ def rank01(v):
 ap = argparse.ArgumentParser()
 ap.add_argument("--joint-run", nargs="+", required=True)
 ap.add_argument("--joint-pooled", nargs="+", required=True, help="in order")
-ap.add_argument("--out", default="results/joint_analysis.json")
+ap.add_argument("--out", default="results_extra/joint_analysis.json")
 args = ap.parse_args()
 out = {}
 seq = build_seq_null(np.random.default_rng(SEED + 3))
