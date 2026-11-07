@@ -36,4 +36,10 @@ python3 final.py --results results/results.json --multiseed results_multiseed/mu
     --joint-pooled "$OUT/joint_p0.npz" "$OUT/joint_p1.npz" "$OUT/joint_p2.npz" \
     --out "$OUT/final.json"
 
+# power curves over defect size (parallel; ~25 min each) and the null distribution
+# of the disagreement between one-sided and two-sided orderings (~2 min)
+python3 power_curves.py --defect tilt  --reps 200 --out "$OUT/pc_tilt.json"
+python3 power_curves.py --defect block --reps 200 --out "$OUT/pc_block.json"
+python3 reversal_null.py --results results/results.json --out "$OUT/reversal_null.json"
+
 echo "done"

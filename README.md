@@ -42,6 +42,8 @@ outputs and those of `multiseed.py`.
 | `joint_analysis.py` | joint null vs. separately calibrated blocks; tests of block independence |
 | `pc1000.py` | positive control over 1,000 replicates, additive and geometric index |
 | `final.py` | criterion correlation table, G-based index variant, Wilson intervals, Monte Carlo check of the power formula |
+| `power_curves.py` | detection rate vs. defect size for six rules (additive, geometric, minimum, Fisher, X² alone, serial alone) |
+| `reversal_null.py` | null distribution of the disagreement between one-sided and two-sided orderings, and where the observed one falls |
 | `run_all.sh` | runs the whole pipeline in order |
 
 Outputs are written to `results_extra/`.
@@ -61,6 +63,12 @@ under-dispersion; the lag-1 autocorrelation uses the upper tail of |Z|.
 bash run_all.sh
 ```
 
+All seeds are fixed (20260908 and seeds derived from it), so repeated runs give identical
+numbers, except the secrets row of the multi-seed experiment, which cannot be seeded.
 
-Run each command on its own line. `--data` expects one subfolder per source and
-one file per run; folder and file names do not matter.
+### Note on `results_control/positive_control.json`
+
+That file comes from an earlier 50-replicate run with a pair-based null of 200 sequences
+of 3×10⁶ digits and does not match the paper. The positive control reported in the paper
+is `results_extra/pc_a.json` + `pc_b.json` (1,000 replicates, pair-based null of 4,000
+sequences of 10⁶ digits).
