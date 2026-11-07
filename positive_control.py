@@ -28,6 +28,21 @@ The corruption parameters are printed and written to the output file. They must
 be reported in the paper: a positive control with undisclosed magnitudes says
 nothing.
 
+Null calibration
+----------------
+The control must be calibrated at the same resolution as the main analysis,
+otherwise its numbers are not comparable with the rest of the paper. The two
+quantities that matter are --seq-null, the number of simulated sequences
+behind the null of the two pair-based criteria, and --seq-cal, the length of
+each of those sequences. They default to the values used by reproduce_all.py;
+if that script is changed, change them here too. Both are written to the
+output file so that the paper can state them.
+
+Lowering --seq-null does not perturb the corrupted streams, whose pair-based
+scores are saturated at zero, but it does shift the clean reference row, whose
+pair-based scores sit in the middle of the null distribution where percentile
+estimates are least precise.
+
 Usage
 -----
     python3 positive_control.py --data data --source "Python secrets" \\
@@ -99,8 +114,17 @@ def main():
                     help="block length reordered in stream B")
     ap.add_argument("--fraction", type=float, default=0.1,
                     help="fraction of blocks reordered in stream C")
-    ap.add_argument("--null", type=int, default=120_000)
-    ap.add_argument("--seq-null", type=int, default=200)
+    ap.add_argument("--null", type=int, default=120_000,
+                    help="multinomial null replicates for the seven "
+                         "count-based criteria; must match reproduce_all.py")
+    ap.add_argument("--seq-null", type=int, default=4_000,
+                    help="simulated sequences behind the null of the two "
+                         "pair-based criteria; must match reproduce_all.py. "
+                         "A smaller value shifts the clean reference row "
+                         "without moving the corrupted ones")
+    ap.add_argument("--seq-cal", type=int, default=1_000_000,
+                    help="length of each simulated sequence in the pair-based "
+                         "null; must match reproduce_all.py")
     ap.add_argument("--seed", type=int, default=SEED)
     ap.add_argument("--out", default="results_control")
     args = ap.parse_args()
@@ -123,10 +147,13 @@ def main():
         print(f"clean reference: {args.source}, N = {N:,}")
     print(f"parameters: delta = {args.delta}, block = {args.block}, fraction = {args.fraction}")
 
+    seq_cal = min(N, args.seq_cal)
+    print(f"null calibration: {args.null:,} multinomial replicates, "
+          f"{args.seq_null:,} sequences of {seq_cal:,} digits, seed {args.seed}")
     print("calibrating nulls ...")
     null = build_null(N, np.random.default_rng(args.seed), args.null)
     seq = build_seq_null(N, np.random.default_rng(args.seed + 3), args.seq_null,
-                         n_cal=min(N, 3_000_000))
+                         n_cal=seq_cal)
     cn = null_index(null, seq, np.random.default_rng(args.seed + 2))
     cg = null_index(null, seq, np.random.default_rng(args.seed + 2), form="geometric")
     thr = float(np.quantile(cn, 0.05))
@@ -178,6 +205,9 @@ def main():
                   f"{np.mean(acc[n]['geo']):16.3f}{acc[n]['alarm_geo'] / R:9.0%}")
         print("\n  the 'clean' row is the false alarm rate and should sit near 5%;")
         print("  the other rows are the power of the index against each defect.")
+        sd = float(np.std(acc["clean"]["add"], ddof=1))
+        print(f"  clean row: sd {sd:.3f} over {R} replicates, "
+              f"standard error of the mean {sd / np.sqrt(R):.3f}")
 
     print(f"\n{'stream':18s}" + "".join(f"{c:>9s}" for c in ALL_CRITERIA))
     for n in names:
@@ -193,7 +223,10 @@ def main():
     same = counts_ok
 
     out = {"source": args.source, "N": int(N), "delta": args.delta, "block": args.block,
-           "fraction": args.fraction, "threshold_5pct": thr, "threshold_5pct_geometric": thr_geo, "reps": args.reps,
+           "fraction": args.fraction, "threshold_5pct": thr,
+           "threshold_5pct_geometric": thr_geo, "reps": args.reps,
+           "seed": args.seed, "null_replicates": args.null,
+           "seq_null_replicates": args.seq_null, "seq_null_length": int(seq_cal),
            "counts_preserved_in_B": bool(same), "weights": WEIGHTS, "streams": rows}
     with open(os.path.join(args.out, "positive_control.json"), "w") as fh:
         json.dump(out, fh, indent=1)
