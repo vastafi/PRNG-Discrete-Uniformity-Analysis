@@ -3,7 +3,7 @@ control with Wilson intervals, Monte Carlo check of the power formula."""
 import argparse, json, math
 import numpy as np
 from scipy.stats import spearmanr, binomtest, ttest_ind, skew, norm
-from common import (SEED, COUNT, SEQ, WEIGHTS, build_null, build_seq_null, scores, index_value,
+from common import (SEED, COUNT, SEQ, SIGNED, WEIGHTS, build_null, build_seq_null, scores, index_value,
                     two_sided, load_joint)
 
 ap = argparse.ArgumentParser()
@@ -45,7 +45,7 @@ d = json.load(open(args.results))
 from common import stats_from_counts
 diff = {}
 for s, o in d["observed"].items():
-    obs = {k: o[k] for k in COUNT}; obs.update(r1=o["r1"], chiser=o["chiser"])
+    obs = {k: o[k] for k in COUNT + list(SIGNED.values())}; obs.update(r1=o["r1"], chiser=o["chiser"])
     t = scores(null, seq, obs, N); base = index_value(t)
     tG = dict(t); tG["chi"] = two_sided(float(stats_from_counts(o["counts"])["G"][0]), null["G"])
     diff[s] = {"pearson": base, "G": index_value(tG), "stored": d["scores"][s].get("index_twoside")}
@@ -78,7 +78,7 @@ out["multiseed_shape"] = {"min": float(resid.min()), "max": float(resid.max()),
                           "skew": float(skew(resid)), "sd": float(resid.std(ddof=1))}
 rng = np.random.default_rng(SEED + 11)
 chk = {}
-for n_runs, alpha in [(29, 0.05), (62, 0.05 / 45), (27, 0.05), (57, 0.05 / 45)]:
+for n_runs, alpha in [(26, 0.05), (56, 0.05 / 45), (21, 0.05), (45, 0.05 / 45)]:
     hits = 0; R = 4000
     for _ in range(R):
         a = rng.choice(resid, n_runs); b = np.clip(rng.choice(resid, n_runs) + 0.1, 0, 1)
