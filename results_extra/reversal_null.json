@@ -1,0 +1,14 @@
+{
+ "R": 20000,
+ "m": 10,
+ "observed_rho": 0.35757575757575755,
+ "observed_rank_of_onesided_first": 8,
+ "rho_median": 0.5272727272727272,
+ "rho_q05_q95": [
+  -0.05454545454545454,
+  0.8666666666666665
+ ],
+ "P_rho_le_observed": 0.3042,
+ "P_first_falls_to_observed_rank_or_lower": 0.16015,
+ "P_first_becomes_last": 0.0226
+}

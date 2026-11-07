@@ -1,0 +1,66 @@
+{
+ "thr": {
+  "additive": 0.2868783194444445,
+  "geometric": 0.153499827328062,
+  "minimum": 0.007874999999999965,
+  "fisher": -34.01041403163865
+ },
+ "grid": [
+  0.002,
+  0.005,
+  0.01,
+  0.02,
+  0.05,
+  0.1
+ ],
+ "rates": {
+  "0.002": {
+   "additive": 0.2,
+   "geometric": 0.705,
+   "minimum": 0.765,
+   "fisher": 0.56,
+   "X2_alone": 0.07,
+   "serial_alone": 0.78
+  },
+  "0.005": {
+   "additive": 0.2,
+   "geometric": 1.0,
+   "minimum": 1.0,
+   "fisher": 1.0,
+   "X2_alone": 0.05,
+   "serial_alone": 1.0
+  },
+  "0.01": {
+   "additive": 0.22,
+   "geometric": 1.0,
+   "minimum": 1.0,
+   "fisher": 1.0,
+   "X2_alone": 0.04,
+   "serial_alone": 1.0
+  },
+  "0.02": {
+   "additive": 0.195,
+   "geometric": 1.0,
+   "minimum": 1.0,
+   "fisher": 1.0,
+   "X2_alone": 0.06,
+   "serial_alone": 1.0
+  },
+  "0.05": {
+   "additive": 0.22,
+   "geometric": 1.0,
+   "minimum": 1.0,
+   "fisher": 1.0,
+   "X2_alone": 0.025,
+   "serial_alone": 1.0
+  },
+  "0.1": {
+   "additive": 0.24,
+   "geometric": 1.0,
+   "minimum": 1.0,
+   "fisher": 1.0,
+   "X2_alone": 0.03,
+   "serial_alone": 1.0
+  }
+ }
+}
