@@ -1,16 +1,6 @@
 #!/usr/bin/env python3
 """
-Recomputes every statistic of
 
-  "A Multi-Criterion Statistical Assessment of Discrete Uniformity in Random
-   and Pseudorandom Number Sources"
-  V. Astafi, A. Leahu, D. Ciorba
-
-from the raw digit files.  Drop-in replacement for version 1: same data
-discovery, same CLI, same results.json keys plus new ones.
-
-What changed with respect to version 1
---------------------------------------
 (a) Two-sided calibration.  v1 scored every criterion with
         u = P(T_null > T_obs),
     which returns u -> 1 when the observed statistic is unusually SMALL.  For
