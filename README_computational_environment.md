@@ -7,7 +7,7 @@ The digit files were generated with:
 | Microsoft Excel | Excel 16.91 (Office LTSC 2021 for Mac) | MacBook Pro (Apple M2) |
 | Wolfram Mathematica | Mathematica 12 | Intel Core i9-12900K desktop |
 | R | R 4.2.3 | MacBook Pro (Apple M2) |
-| Python (NumPy, secrets) | Python 3.9.6 | MacBook Pro (Apple M2) |
+| Python (NumPy, secrets) | Python 3.9.6, NumPy 2.0.2 | MacBook Pro (Apple M2) |
 | C++ `rand()` | Apple Clang 16.0.0 | MacBook Pro (Apple M2) |
 | Java SecureRandom, ThreadLocalRandom | OpenJDK 21.0.3 (Corretto) | MacBook Pro (Apple M2) |
 
@@ -16,7 +16,7 @@ All statistics, simulations, tables and figures are computed in Python with NumP
 ## Notes on two sources
 
 - **C++ `rand()`** (from `<cstdlib>`, platform-dependent, not `std::mt19937`): each run is a separate execution seeded with `srand(time(0))` and writing `rand() % 10`. The modulo bias is negligible at this sample size: it raises the expected goodness-of-fit statistic at 15,688,140 digits by about 0.2 even for `RAND_MAX = 32767`. The six files were checked to be distinct and non-overlapping; the seeds were not recorded.
-- **Random.org**: integers 0–9 generated from atmospheric noise, collected in batches of at most 10,000 (at least 262 requests per run).
+- **Random.org**: integers 0–9 generated from atmospheric noise, collected through the Random.org HTTP API in requests of at most 10,000 integers (at least 262 requests per run).
 
 ## Reproducibility
 
