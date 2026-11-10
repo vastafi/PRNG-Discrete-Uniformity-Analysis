@@ -1,0 +1,8 @@
+{
+ "B": 120000,
+ "weight_count_block": 0.7,
+ "threshold_5pct_this_run": 0.2866600833333333,
+ "threshold_used": 0.287,
+ "P0_IA_below_threshold": 0.240625,
+ "mc_se": 0.0012339793669770172
+}

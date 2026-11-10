@@ -118,11 +118,6 @@ def figure2(res, out, pdf):
                   ha="right", fontsize=7.5)
     ax.set_ylabel("per-run composite index")
     ax.set_ylim(0, 1)
-    w = res.get("within_source_range_mean")
-    b = res.get("between_source_range")
-    if w and b:
-        ax.set_title(f"mean within-source range {w:.2f} vs between-source range {b:.2f}",
-                     fontsize=8)
     save(fig, out, "figure2", pdf)
 
 
