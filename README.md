@@ -1,7 +1,6 @@
 # Reproduction package
 
-Code and results for the paper *Concordance with the discrete uniform distribution of ten
-commonly used random number sources and the limits of a composite index* (Astafi, Leahu,
+Code and results for the paper *Limits of a composite index for ranking random number sources, illustrated on ten decimal digit sources* (Astafi, Leahu,
 Ciorbă).
 
 The digit files are in the companion repository
@@ -46,6 +45,7 @@ archive_not_used/   older scripts, figures and tables not used in the paper (see
 | `final.py` | criterion-correlation table, G-based index variant, Wilson intervals, Monte Carlo check of the power formula |
 | `power_curves.py` | detection rate vs. defect size for six rules (additive, geometric, minimum, Fisher, X² alone, serial alone) |
 | `reversal_null.py` | null distribution of the disagreement between one-sided and two-sided orderings |
+| `winner_tail.py` | for ten ideal sources, how often the source placed first under each tail convention has an under-dispersed X² |
 | `ceiling_bound.py` | Proposition 2: the power ceiling of the additive index, P0(I_A < 0.287) |
 | `make_figure_power.py` | Figure 2 (power curves) from `pc_tilt.json` and `pc_block.json` |
 
@@ -60,6 +60,7 @@ archive_not_used/   older scripts, figures and tables not used in the paper (see
 | Positive-control table | `results/extra/pc_a.json`, `pc_b.json` |
 | Proposition 2 (power ceiling, 0.241) | `results/extra/ceiling_bound.json` |
 | One-sided vs two-sided null (0.30, 0.16) | `results/extra/reversal_null.json` |
+| Winner's X² under each convention (22% vs 0.3%) | `results/extra/winner_tail.json` |
 | Multi-seed ANOVA | `results/multiseed/multiseed.json` |
 | Extraction-path control | `results/extraction/extraction_audit.json` |
 

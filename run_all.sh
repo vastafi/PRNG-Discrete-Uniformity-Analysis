@@ -44,6 +44,9 @@ python3 scripts/reversal_null.py --results results/main/results.json --out "$OUT
 
 # Proposition 2 (power ceiling, ~5 min) and Figure 2 of the paper
 python3 scripts/ceiling_bound.py
+
+# Section 4: where the winner's X^2 falls under each tail convention (~10 min)
+python3 scripts/winner_tail.py
 python3 scripts/make_figure_power.py --extra "$OUT" --out figures/figure2_power.pdf
 
 echo "done"

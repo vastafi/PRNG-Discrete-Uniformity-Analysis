@@ -1,0 +1,16 @@
+{
+ "R": 20000,
+ "m": 10,
+ "one_sided": {
+  "P_winner_X2_lower_5pct": 0.2217,
+  "P_winner_X2_lower_1pct": 0.057,
+  "P_winner_X2_upper_5pct": 0.00045,
+  "median_left_tail_prob_of_winner": 0.14847916666666672
+ },
+ "two_sided": {
+  "P_winner_X2_lower_5pct": 0.00325,
+  "P_winner_X2_lower_1pct": 0.0004,
+  "P_winner_X2_upper_5pct": 0.00395,
+  "median_left_tail_prob_of_winner": 0.4954708333333333
+ }
+}
