@@ -42,4 +42,8 @@ python3 power_curves.py --defect tilt  --reps 200 --out "$OUT/pc_tilt.json"
 python3 power_curves.py --defect block --reps 200 --out "$OUT/pc_block.json"
 python3 reversal_null.py --results results/results.json --out "$OUT/reversal_null.json"
 
+# Proposition 2 (power ceiling, ~5 min) and Figure 2 of the paper
+python3 ceiling_bound.py
+python3 make_figure_power.py --extra "$OUT" --out figures/figure_power.pdf
+
 echo "done"

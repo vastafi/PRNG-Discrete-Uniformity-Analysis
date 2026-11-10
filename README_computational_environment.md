@@ -13,6 +13,11 @@ The digit files were generated with:
 
 All statistics, simulations, tables and figures are computed in Python with NumPy and SciPy (versions in `requirements.txt`).
 
+## Notes on two sources
+
+- **C++ `rand()`** (from `<cstdlib>`, platform-dependent, not `std::mt19937`): each run is a separate execution seeded with `srand(time(0))` and writing `rand() % 10`. The modulo bias is negligible at this sample size: it raises the expected goodness-of-fit statistic at 15,688,140 digits by about 0.2 even for `RAND_MAX = 32767`. The six files were checked to be distinct and non-overlapping; the seeds were not recorded.
+- **Random.org**: integers 0–9 generated from atmospheric noise, collected in batches of at most 10,000 (at least 262 requests per run).
+
 ## Reproducibility
 
 Three levels of reproducibility should be distinguished.

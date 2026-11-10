@@ -44,9 +44,32 @@ outputs and those of `multiseed.py`.
 | `final.py` | criterion correlation table, G-based index variant, Wilson intervals, Monte Carlo check of the power formula |
 | `power_curves.py` | detection rate vs. defect size for six rules (additive, geometric, minimum, Fisher, X² alone, serial alone) |
 | `reversal_null.py` | null distribution of the disagreement between one-sided and two-sided orderings, and where the observed one falls |
+| `ceiling_bound.py` | Proposition 2 of the paper: the power ceiling of the additive index, P0(I_A < 0.287), from the null simulation |
+| `make_figure_power.py` | Figure 2 of the paper (power curves) from `pc_tilt.json` and `pc_block.json` |
 | `run_all.sh` | runs the whole pipeline in order |
 
 Outputs are written to `results_extra/`.
+
+### Where each result of the paper comes from
+
+| paper | file |
+|---|---|
+| Figure 1 (per-run index) | `figures/figure2.pdf`, from `make_figures.py` |
+| Figure 2 (power curves) | `figures/figure_power.pdf`, from `make_figure_power.py` |
+| Tables of criterion values, scores and index | `results/results.json`, `tables/` |
+| Criterion-correlation table | `results_extra/final.json` (`corr_table`) |
+| Positive-control table | `results_extra/pc_a.json`, `pc_b.json` |
+| Proposition 2 (power ceiling, 0.241) | `results_extra/ceiling_bound.json` |
+| One-sided vs two-sided null (0.30, 0.16) | `results_extra/reversal_null.json` |
+| Multi-seed ANOVA | `results_multiseed/multiseed.json` |
+| Extraction-path control | `results_extraction/` |
+
+Figures 3 and 4 produced by `make_figures.py` are not used in the paper. The file
+`tables/table_criterion_correlation.*` comes from an earlier run; the correlation table
+of the paper is `corr_table` in `results_extra/final.json`.
+
+Software versions, hardware and the reproducibility notes are in
+[`README_computational_environment.md`](README_computational_environment.md).
 
 ### Scoring of the moment criteria
 
