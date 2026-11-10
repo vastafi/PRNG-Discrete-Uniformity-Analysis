@@ -25,8 +25,8 @@ several of the ten sources in the paper.
 
 Usage
 -----
-    python3 extraction_audit.py --n 2000000 --out results_extraction
-    python3 extraction_audit.py --n 2000000 --generator MT19937
+    python3 scripts/extraction_audit.py --n 2000000 --out results/extraction
+    python3 scripts/extraction_audit.py --n 2000000 --generator MT19937
 """
 
 import argparse, json, os
@@ -66,7 +66,7 @@ def main():
     ap.add_argument("--seed", type=int, default=SEED)
     ap.add_argument("--null", type=int, default=20_000)
     ap.add_argument("--seq-null", type=int, default=100)
-    ap.add_argument("--out", default="results_extraction")
+    ap.add_argument("--out", default="results/extraction")
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)
 

@@ -1,14 +1,14 @@
 """Null distribution of the disagreement between the one-sided and the two-sided
 orderings of ten ideal sources, and where the observed disagreement falls in it.
-Usage: reversal_null.py [--results results/results.json] [--out results_extra/reversal_null.json]"""
+Usage: reversal_null.py [--results results/main/results.json] [--out results/extra/reversal_null.json]"""
 import argparse, json
 import numpy as np
 from scipy.stats import spearmanr
 from common import SEED, COUNT, SIGNED, WEIGHTS, build_null, build_seq_null, _mid
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--results", default="results/results.json")
-ap.add_argument("--out", default="results_extra/reversal_null.json")
+ap.add_argument("--results", default="results/main/results.json")
+ap.add_argument("--out", default="results/extra/reversal_null.json")
 a = ap.parse_args()
 
 # observed: one-sided (version-2) index vs corrected two-sided index on the ten sources

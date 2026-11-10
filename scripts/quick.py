@@ -6,8 +6,8 @@ from scipy.stats import chi2, norm, f as fdist, spearmanr
 from common import stats_from_counts, build_null, SEED, HX
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--results", default="results/results.json")
-ap.add_argument("--out", default="results_extra/quick.json")
+ap.add_argument("--results", default="results/main/results.json")
+ap.add_argument("--out", default="results/extra/quick.json")
 args = ap.parse_args()
 d = json.load(open(args.results))
 N = 15_688_140

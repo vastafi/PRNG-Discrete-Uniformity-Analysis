@@ -10,3 +10,6 @@ venv/
 .idea/
 .vscode/
 .DS_Store
+
+# CSV copies written next to results.json; the tracked copies are in tables/
+results/main/table_*.csv

@@ -7,12 +7,12 @@ from common import (SEED, COUNT, SEQ, SIGNED, WEIGHTS, build_null, build_seq_nul
                     two_sided, load_joint)
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--results", default="results/results.json")
-ap.add_argument("--multiseed", default="results_multiseed/multiseed.json")
+ap.add_argument("--results", default="results/main/results.json")
+ap.add_argument("--multiseed", default="results/multiseed/multiseed.json")
 ap.add_argument("--pc", nargs="+", required=True, help="pc1000.py outputs, in order")
 ap.add_argument("--joint-run", nargs="+", required=True)
 ap.add_argument("--joint-pooled", nargs="+", required=True, help="joint_null.py outputs at the pooled length, in order")
-ap.add_argument("--out", default="results_extra/final.json")
+ap.add_argument("--out", default="results/extra/final.json")
 args = ap.parse_args()
 
 out = {}

@@ -1,14 +1,14 @@
 """Power curves of six aggregation rules against two kinds of defect (paper figure).
-Reads results_extra/pc_tilt.json and results_extra/pc_block.json (produced by power_curves.py).
-Usage: python3 make_figure_power.py [--extra results_extra] [--out figures/figure_power.pdf]"""
+Reads results/extra/pc_tilt.json and results/extra/pc_block.json (produced by power_curves.py).
+Usage: python3 scripts/make_figure_power.py [--extra results/extra] [--out figures/figure2_power.pdf]"""
 import argparse, json, os
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--extra", default="results_extra")
-ap.add_argument("--out", default="figures/figure_power.pdf")
+ap.add_argument("--extra", default="results/extra")
+ap.add_argument("--out", default="figures/figure2_power.pdf")
 a = ap.parse_args()
 
 RULES = [("additive", "additive index", "#2a78d6", "o", "-"),

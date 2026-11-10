@@ -26,8 +26,8 @@ the same as for reproduce_all.py: one subfolder per source, one file per seed.
 
 Usage
 -----
-    python3 multiseed.py --seeds 200 --n 1000000 --out results_multiseed
-    python3 multiseed.py --seeds 200 --n 1000000 --external data_seeds
+    python3 scripts/multiseed.py --seeds 200 --n 1000000 --out results/multiseed
+    python3 scripts/multiseed.py --seeds 200 --n 1000000 --external data_seeds
 """
 
 import argparse, json, os
@@ -85,7 +85,7 @@ def main():
     ap.add_argument("--null", type=int, default=20_000)
     ap.add_argument("--seq-null", type=int, default=100)
     ap.add_argument("--external", default=None, help="folder with externally generated seeds")
-    ap.add_argument("--out", default="results_multiseed")
+    ap.add_argument("--out", default="results/multiseed")
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)
 

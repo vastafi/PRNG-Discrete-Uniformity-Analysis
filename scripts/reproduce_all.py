@@ -53,8 +53,8 @@ What changed with respect to version 1
 
 Usage
 -----
-    python3 reproduce_all.py --data data --out results
-    python3 reproduce_all.py --data data --out results --seq-null 200
+    python3 scripts/reproduce_all.py --data data --out results/main
+    python3 scripts/reproduce_all.py --data data --out results --seq-null 200
 """
 
 import argparse, csv, json, os, re, sys
@@ -419,7 +419,7 @@ def tiers_from_cis(per_run, index_by_source):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--data", required=True)
-    ap.add_argument("--out", default="./results")
+    ap.add_argument("--out", default="results/main")
     ap.add_argument("--null", type=int, default=N_NULL)
     ap.add_argument("--seq-null", type=int, default=N_SEQ_NULL)
     ap.add_argument("--n-cal", type=int, default=N_CAL,
