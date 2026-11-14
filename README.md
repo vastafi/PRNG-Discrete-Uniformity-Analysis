@@ -47,6 +47,7 @@ archive_not_used/   older scripts, figures and tables not used in the paper (see
 | `reversal_null.py` | null distribution of the disagreement between one-sided and two-sided orderings |
 | `winner_tail.py` | for ten ideal sources, how often the source placed first under each tail convention has an under-dispersed X² |
 | `ceiling_bound.py` | Proposition 2: the power ceiling of the additive index, P0(I_A < 0.287) |
+| `verif_prop1.py` | check of Proposition 1: exact covariance for small k, N and Monte Carlo for k = 10 |
 | `make_figure_power.py` | Figure 2 (power curves) from `pc_tilt.json` and `pc_block.json` |
 
 ## Where each result of the paper comes from
